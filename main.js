@@ -1,37 +1,57 @@
 function preload()
 {
 }
+noseX=0;
+noseY=0;
+
+leftwristX=0;
+rightwristX=0;
+difference=0;
 
 function setup()
 {
-    canvas=createCanvas(300,300);
-    canvas.center();
     video=createCapture(VIDEO);
-    video.hide();
-    classifier=ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/v_sl95BzE/model.json',modelloded)
+    video.size(550,500);
+
+    canvas=createCanvas(550,550);
+    canvas.position(560,110);
+
+    posenet=ml5.poseNet(video,modelloaded);
+    posenet.on('pose',gotposes);
+
+}
+
+function modelloaded()
+{
+    console.log('posenet is initialized');
 }
 
 function draw()
 {
-    image(video,0,0,300,300);
-    classifier.classify(video,gotresult);
+    background('#808080');
+
+    document.getElementById("circle_side").innerHTML="width and height of a circle will be = "+difference+"px";
+    fill('#F60000');
+    stroke('#000000');
+    circle(noseX,noseY,difference);
+
+
 }
 
-function gotresult(error,results)
+function gotposes(results)
 {
-    if(error)
-    {
-        console.error(error);
-    }
-    else
+    if(results.length>0)
     {
         console.log(results);
-        document.getElementById("result_object_name").innerHTML=results[0].label;
-        document.getElementById("result_object_accuracy").innerHTML=results[0].confidence.toFixed(3);
-    }
-}
+        noseX=results[0].pose.nose.x;
+        noseY=results[0].pose.nose.y;
+        console.log("x coordinate of nose is "+noseX+"y coordinate of nose is"+noseY);
 
-function modelloded()
-{
-    console.log('modelloded');
+        rightwristX=results[0].pose.rightWrist.x;
+        leftwristX=results[0].pose.leftWrist.x;
+        console.log("left wrist x coordinate is "+ leftwristX+"right wrist x coordinate is "+rightwristX);
+
+        difference=floor(leftwristX-rightwristX);
+        console.log("difference between left and rigth wrist x coordinate is "+difference);
+    }
 }
